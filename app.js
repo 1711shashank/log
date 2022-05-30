@@ -18,6 +18,7 @@ app.listen(port);
 
 app.post('/login', login);
 app.post('/logout', logout);
+app.get('/getEmail', getEmail);
 
 async function login(req, res) {
     try {
@@ -71,18 +72,40 @@ async function login(req, res) {
 
 async function logout(req, res) {
 
-    let temp = await req.cookies;
-
-    console.log("Read Cookies :", temp.authToken);
-
-    let user = await userDataBase.findOne({ authToken: temp.authToken })
+    let cookieData = await req.cookies;
+    let user = await userDataBase.findOne({ authToken: cookieData.authToken })
     if (user) {
         user.deleteAuthToekn();
         user.save();
+
+        res.status(200).json({
+            message: 'LogOut Successfully',
+            statusCode: 200
+        })
     }
-    res.status(200).json({
-        message: 'LogOut Successfully',
-        statusCode: 200
-    })
+    else {
+        res.status(200).json({
+            message: 'You are already Logged Out',
+            statusCode: 200
+        })
+    }
+
+}
+
+async function getEmail(req, res) {
+    let cookieData = await req.cookies;
+    let user = await userDataBase.findOne({ authToken: cookieData.authToken })
+    if (user) {
+        res.status(200).json({
+            Email: user.email,
+            statusCode: 200
+        })
+    }
+    else {
+        res.status(200).json({
+            message: 'Login to get Email',
+            statusCode: 200
+        })
+    }
 
 }
